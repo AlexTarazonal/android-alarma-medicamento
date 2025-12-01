@@ -1,0 +1,16 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/nav_medicamentos"
+        android:icon="@drawable/home"
+        android:title="Mis Medicamentos" />
+
+    <item
+        android:id="@+id/nav_historial"
+        android:icon="@drawable/historial"
+        android:title="Historial" />
+
+    <item
+        android:id="@+id/nav_config"
+        android:icon="@drawable/ajustes"
+        android:title="Configuración" />
+</menu>

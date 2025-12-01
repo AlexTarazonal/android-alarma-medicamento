@@ -1,0 +1,7 @@
+<resources>
+    <string name="app_name">ProyectoFinal</string>
+    <string name="olvidaste_contrasena"><u>¿Olvidaste la contraseña?</u></string>
+    <string name="iniciar_sesion"><u>Iniciar Sesión</u></string>
+    <string name="registrate"><u>Registrate</u></string>
+    <string name="default_web_client_id">217144818015-fnrgd8ssnrcat4ghv25uk022eu318irt.apps.googleusercontent.com</string>
+</resources>
