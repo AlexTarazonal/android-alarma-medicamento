@@ -23,7 +23,7 @@ import com.google.firebase.firestore.FirebaseFirestore
 class Login : AppCompatActivity() {
 
     private val db = FirebaseFirestore.getInstance()
-    private val auth = FirebaseAuth.getInstance()
+    private val auth: FirebaseAuth = FirebaseAuth.getInstance()
     private lateinit var googleSignInClient: GoogleSignInClient
     private val RC_SIGN_IN = 1001
 
@@ -58,16 +58,10 @@ class Login : AppCompatActivity() {
         val txtUsuarioCorreo = findViewById<TextInputEditText>(R.id.txtUsuario)
         val txtContraseña = findViewById<TextInputEditText>(R.id.txtContraseña)
         val txtRegistrate = findViewById<TextView>(R.id.txtRegistrar)
-        val txtOlvideContra = findViewById<TextView>(R.id.txtOlvidaste)
         val btnGoogle = findViewById<Button>(R.id.btnGoogle)
 
         txtRegistrate.setOnClickListener {
             startActivity(Intent(this, Registrate::class.java))
-            finish()
-        }
-
-        txtOlvideContra.setOnClickListener {
-            startActivity(Intent(this, OlvideContra::class.java))
             finish()
         }
 
@@ -81,8 +75,10 @@ class Login : AppCompatActivity() {
             }
 
             if (usuarioCorreo.contains("@")) {
+                // Login usando correo
                 loginWithEmail(usuarioCorreo, contraseña)
             } else {
+                // Login usando nombre de usuario (busca correo en Firestore)
                 db.collection("usuarios")
                     .whereEqualTo("usuario", usuarioCorreo)
                     .get()
@@ -91,10 +87,16 @@ class Login : AppCompatActivity() {
                             val correo = documents.documents[0].getString("correo")
                             if (!correo.isNullOrEmpty()) {
                                 loginWithEmail(correo, contraseña)
-                            } else showAlert("No se encontró un correo para este usuario")
-                        } else showAlert("Usuario no encontrado")
+                            } else {
+                                showAlert("No se encontró un correo para este usuario")
+                            }
+                        } else {
+                            showAlert("Usuario no encontrado")
+                        }
                     }
-                    .addOnFailureListener { showAlert("Error al buscar usuario: ${it.message}") }
+                    .addOnFailureListener {
+                        showAlert("Error al buscar usuario: ${it.message}")
+                    }
             }
         }
 
@@ -130,9 +132,9 @@ class Login : AppCompatActivity() {
         auth.signInWithCredential(credential)
             .addOnCompleteListener(this) { task ->
                 if (task.isSuccessful) {
-                    val intent = Intent(this, Principal::class.java)
-                    startActivity(intent)
-                    finish()
+                    ensureUserDocument {
+                        goToPrincipal()
+                    }
                 } else {
                     showAlert("Error con Firebase: ${task.exception?.message}")
                 }
@@ -140,17 +142,54 @@ class Login : AppCompatActivity() {
     }
 
     private fun loginWithEmail(correo: String, contraseña: String) {
-        FirebaseAuth.getInstance()
-            .signInWithEmailAndPassword(correo, contraseña)
+        auth.signInWithEmailAndPassword(correo, contraseña)
             .addOnCompleteListener {
                 if (it.isSuccessful) {
-                    val intent = Intent(this, Principal::class.java)
-                    startActivity(intent)
-                    finish()
+                    ensureUserDocument {
+                        goToPrincipal()
+                    }
                 } else {
                     showAlert("Error al iniciar sesión: ${it.exception?.message}")
                 }
             }
+    }
+
+    private fun ensureUserDocument(onComplete: () -> Unit) {
+        val user = auth.currentUser
+        if (user == null) {
+            showAlert("No se encontró sesión de usuario.")
+            return
+        }
+
+        val userDocRef = db.collection("usuarios").document(user.uid)
+
+        userDocRef.get()
+            .addOnSuccessListener { doc ->
+                if (!doc.exists()) {
+                    val data = hashMapOf(
+                        "uid" to user.uid,
+                        "correo" to (user.email ?: ""),
+                        "nombre" to (user.displayName ?: ""),
+                        "creadoEn" to com.google.firebase.Timestamp.now()
+                    )
+                    userDocRef.set(data)
+                        .addOnSuccessListener { onComplete() }
+                        .addOnFailureListener { e ->
+                            showAlert("Error al guardar datos del usuario: ${e.message}")
+                        }
+                } else {
+                    onComplete()
+                }
+            }
+            .addOnFailureListener { e ->
+                showAlert("Error al leer datos del usuario: ${e.message}")
+            }
+    }
+
+    private fun goToPrincipal() {
+        val intent = Intent(this, Principal::class.java)
+        startActivity(intent)
+        finish()
     }
 
     private fun showAlert(message: String) {

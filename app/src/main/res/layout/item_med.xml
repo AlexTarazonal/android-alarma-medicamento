@@ -134,10 +134,21 @@
                 android:id="@+id/switchMed"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_marginEnd="8dp"
                 android:checked="true"
-                android:trackTint="@color/gray"
                 android:thumbTint="@color/gray"
-                android:layout_marginEnd="16dp"/>
+                android:trackTint="@color/gray" />
+
+            <TextView
+                android:id="@+id/txtRemaining"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Sin horario"
+                android:textSize="12sp"
+                android:textColor="@android:color/darker_gray"
+                android:maxLines="1"
+                android:ellipsize="end" />
 
             <Button
                 android:id="@+id/btnSonar"

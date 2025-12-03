@@ -237,8 +237,7 @@
                             android:layout_height="wrap_content"
                             android:layout_alignParentStart="true"
                             android:layout_centerVertical="true"
-                            android:orientation="vertical"
-                            android:layout_toStartOf="@+id/radio_advance_1d">
+                            android:orientation="vertical">
 
                             <TextView
                                 android:layout_width="wrap_content"

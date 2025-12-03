@@ -12,5 +12,9 @@ data class MedItemEntity(
     val desc: String,
     val days: Int,
     val hours: Int,
+
+
+    val userId: String,
+
     var status: String = "Pendiente"
 )
